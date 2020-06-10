@@ -1,0 +1,16 @@
+Steps taken during preprocessing:
+
+1. run parse_and_z_project.py, which parses and max z-projects each nd2 file
+2. use imagej_stitching.py to calculate stitching in DAPI channel for every tissue/round
+3. use stitch_from_coords.py to stitch together images for each gene x round combination and apply median filter
+4. run subtract_background.py to register blanks and subtract them from source images
+5. use Fiji to determine intensity thresholds for each channel based on previous stitched images (setting max to 150% of min)
+6. run apply_channel_thresholds.py
+7. run calculate_and_apply_flat_field_correction.py
+8. run save_registered_images.py to register across rounds and break into tiles
+9. run write_tf_records.py
+
+Ideas for the future:
+
+Segmenting cells.
+Using BigStitcher for flat-field correction.
