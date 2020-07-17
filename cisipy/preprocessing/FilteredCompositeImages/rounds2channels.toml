@@ -1,0 +1,24 @@
+title = "cisipy_configuration"
+
+# Example entry for single tissue with multiple rounds of CISI imaging
+[[samples]]
+  name = "tissue1"
+  [[samples.rounds]]
+    filepath = "BigStitcherTestInput/D6_round1.nd2"
+    channels = ["DAPI", "Composite_6", "Composite_7", "Composite_2"],  # round 1
+  [[samples.rounds]]
+    filepath = "BigStitcherTestInput/D6_round2.nd2"
+    channels = ["DAPI", "Composite_8", "Composite_9", "Composite_5"],  # round 2
+  [[samples.rounds]]
+    filepath = "BigStitcherTestInput/D6_round3.nd2"
+    channels = ["DAPI", "Composite_0", "Composite_4", "Composite_1"],  # round 3
+  [[samples.rounds]]
+    filepath = "BigStitcherTestInput/D6_round4.nd2"
+    channels = ["DAPI", "Composite_3", "Ndnf", "Composite_10"],        # round 4
+  [[samples.rounds]]
+    filepath = "BigStitcherTestInput/D6_round5.nd2"
+    channels = ["DAPI", "Vtn", "Csf1r", "F3"],                         # round 5
+
+###
+# Add more samples below by copying the syntax above!
+###
