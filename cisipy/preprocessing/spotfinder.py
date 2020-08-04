@@ -1,6 +1,7 @@
 import numpy as np
 import imageio
 from pathlib import Path
+import multiprocessing as mp
 
 from starfish import data, FieldOfView
 from starfish.types import Axes, Features
@@ -9,46 +10,92 @@ from starfish.core.imagestack.imagestack import ImageStack
 from starfish.spots import DecodeSpots, FindSpots
 from starfish import Codebook
 
-def find_spots_all_samples(config):
+def find_spots_all_samples(config, parallelize=0):
     """
     """
     # TODO: Fill in docstring
 
-    workspace_directory = samples_config["workspace_directory"]
+    workspace_directory = config["workspace_directory"]
     input_directory = Path(workspace_directory, "stitched")
     output_directory = Path(workspace_directory, "spots_only")
-    samples = samples_config["samples"]
+    output_directory.mkdir(exist_ok=True)
 
+    samples = config["samples"]
 
     # TODO: Figure out if it's possible to parallelize by sample here.
-    for sample in samples:
-        find_spots_single_sample(sample, input_directory, output_directory)
+    if parallelize > 0:
+        num_processes = mp.cpu_count()
+        print(num_processes)
+        processes = []
+        # if parallelize > 1:
+        #     for sample in samples:
+        #         process = mp.Process(target=find_spots_single_sample, args=(sample, input_directory, output_directory, parallelize))
+        #         process.start()
+        #         processes.append(process)
+        #     for process in processes:
+        #         process.join()
+        # else:
+        #     with mp.Pool(num_processes) as pool:
+        #         output = pool.starmap(find_spots_single_sample, [(sample, input_directory, output_directory, parallelize) for sample in samples])
+        for sample in samples:
+            process = mp.Process(target=find_spots_single_sample, args=(sample, input_directory, output_directory, parallelize = parallelize - 1))
+            process.start()
+            processes.append(process)
 
-def find_spots_single_sample(sample, input_directory, output_directory):
+        for process in processes:
+            process.join()
+    else:
+        for sample in samples:
+            find_spots_single_sample(sample, input_directory, output_directory)
+
+def find_spots_single_sample(sample, input_directory, output_directory, parallelize=0):
     """
     """
     # TODO: Fill in docstring
 
     sample_name = sample["name"]
-
     rounds = sample["rounds"]
-    for round_index, imaging_round in enumerate(rounds):
-        round_directory = ("round%d" % round_index)
-        sample_input_subdirectory = input_directory / sample_name / round_directory
-        sample_output_subdirectory = output_directory / sample_name / round_directory
-        sample_output_subdirectory.mkdir(exist_ok=True)
 
-        channels = imaging_round["channels"]
-        for channel_index, channel in enumerate(channels):
-            input_filename = channel + ("_fused_tp_0_ch_%d.tif" % channel_index)
-            output_filename = channel + ".tif"
-            input_path = sample_input_subdirectory / input_filename
-            output_path = sample_output_subdirectory / output_filename
+    processes = []
+    for round_index, imaging_round in enumerate(rounds, start=1):
+        if parallelize > 0:
+            process = mp.Process(target=find_spots_in_round, args=(sample_name, round_index, imaging_round, input_directory, output_directory))
+            process.start()
+            processes.append(process)
+        else:
+            find_spots_in_round(sample_name, round_index, imaging_round, input_directory, output_directory)
 
+    for process in processes:
+        process.join()
+
+def find_spots_in_round(sample_name, round_index, imaging_round, input_directory, output_directory):
+    """
+    """
+
+    round_directory = ("round%d" % round_index)
+    sample_input_subdirectory = input_directory / sample_name / round_directory
+    sample_output_subdirectory = output_directory / sample_name / round_directory
+    sample_output_subdirectory.mkdir(parents=True, exist_ok=True)
+
+    channels = imaging_round["channels"]
+    filename = imaging_round["filename"]
+    reference_channel = imaging_round["reference_channel"] 
+    for channel_index, channel in enumerate(channels):
+        input_filename = filename + ("_fov_0_4") + ("_fused_tp_0_ch_%d.tif" % channel_index)
+        output_filename = channel + ".tif"
+        input_path = sample_input_subdirectory / input_filename
+        output_path = sample_output_subdirectory / output_filename
+
+        if channel_index == reference_channel:
+            image_stack = imageio.volread(input_path)
+            max_filtered_image_stack = image_stack.max(0)
+            imageio.imsave(output_path, max_filtered_image_stack)
+        else:
             find_spots(input_path, output_path)
 
+
 def find_spots(input_path, output_path, intensity_percentile=99.995, filter_width=2, small_peak_min=4, small_peak_max=100,
-               big_peak_min=25, big_peak_max=10000, small_peak_dist=2, big_peak_dist=0.75, block_dim_fraction=0.5,
+               big_peak_min=25, big_peak_max=10000, small_peak_dist=2, big_peak_dist=0.75, block_dim_fraction=0.25,
                spot_pad_pixels=2, keep_existing=False):
     """
     Find and keep only spots from stitched images.
@@ -58,12 +105,6 @@ def find_spots(input_path, output_path, intensity_percentile=99.995, filter_widt
     image_stack = imageio.volread(input_path)
 
     print(image_stack.shape)
-
-    # If DAPI, skip this (TODO: definitely shouldn't do this here)
-    if 'DAPI' in output_path.split('/')[-1]:
-        imageio.imsave(output_path, image_stack.max(0))
-        return
-
     thresholded_image = np.copy(image_stack)
     
     _, height, width = image_stack.shape
