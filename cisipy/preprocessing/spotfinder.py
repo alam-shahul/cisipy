@@ -27,18 +27,8 @@ def find_spots_all_samples(config, parallelize=0):
         num_processes = mp.cpu_count()
         print(num_processes)
         processes = []
-        # if parallelize > 1:
-        #     for sample in samples:
-        #         process = mp.Process(target=find_spots_single_sample, args=(sample, input_directory, output_directory, parallelize))
-        #         process.start()
-        #         processes.append(process)
-        #     for process in processes:
-        #         process.join()
-        # else:
-        #     with mp.Pool(num_processes) as pool:
-        #         output = pool.starmap(find_spots_single_sample, [(sample, input_directory, output_directory, parallelize) for sample in samples])
         for sample in samples:
-            process = mp.Process(target=find_spots_single_sample, args=(sample, input_directory, output_directory, parallelize = parallelize - 1))
+            process = mp.Process(target=find_spots_single_sample, args=(sample, input_directory, output_directory, parallelize - 1))
             process.start()
             processes.append(process)
 
@@ -81,7 +71,7 @@ def find_spots_in_round(sample_name, round_index, imaging_round, input_directory
     filename = imaging_round["filename"]
     reference_channel = imaging_round["reference_channel"] 
     for channel_index, channel in enumerate(channels):
-        input_filename = filename + ("_fov_0_4") + ("_fused_tp_0_ch_%d.tif" % channel_index)
+        input_filename = filename + ("_fused_tp_0_ch_%d.tif" % channel_index)
         output_filename = channel + ".tif"
         input_path = sample_input_subdirectory / input_filename
         output_path = sample_output_subdirectory / output_filename

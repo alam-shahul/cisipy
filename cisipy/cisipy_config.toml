@@ -1,0 +1,36 @@
+title = "cisipy_configuration"
+workspace_directory = "cisipy_test"
+data_directory = "data"
+path_to_fiji="preprocessing/Fiji.app"
+
+# Example entry for single tissue with multiple rounds of CISI imaging
+[[samples]]
+  name = "tissue1"
+  [[samples.rounds]]
+    filename = "D6_round1"
+    reference_channel = 0
+    composite_channels = [1, 2, 3]
+    channels = ["DAPI", "Composite_6", "Composite_7", "Composite_2"]
+  [[samples.rounds]]
+    filename = "D6_round2"
+    reference_channel = 0
+    composite_channels = [1, 2, 3]
+    channels = ["DAPI", "Composite_8", "Composite_9", "Composite_5"]
+  [[samples.rounds]]
+    filename = "D6_round3"
+    reference_channel = 0
+    composite_channels = [1, 2, 3]
+    channels = ["DAPI", "Composite_0", "Composite_4", "Composite_1"]
+  [[samples.rounds]]
+    filename = "D6_round4"
+    reference_channel = 0
+    composite_channels = [1, 3]
+    channels = ["DAPI", "Composite_3", "Ndnf", "Composite_10"]      
+  [[samples.rounds]]
+    filename = "D6_round5"
+    reference_channel = 0
+    channels = ["DAPI", "Vtn", "Csf1r", "F3"]                       
+
+###
+# Add more samples below by copying the syntax above!
+###
