@@ -47,7 +47,7 @@ def segment_all_samples(config, parallelize=0):
         num_processes = mp.cpu_count()
         processes = []
         for sample in samples:
-            process = mp.Process(target=merge_composites_single_sample, args=(sample, input_directory))
+            process = mp.Process(target=segment_single_sample, args=(sample, input_directory))
             process.start()
             processes.append(process)
 
@@ -55,7 +55,7 @@ def segment_all_samples(config, parallelize=0):
             process.join()
     else:
         for sample in samples:
-            merge_composites_single_sample(sample, input_directory)
+            segment_single_sample(sample, input_directory)
 
 def merge_composites(composite_filepaths, output_path):
     """
@@ -72,22 +72,29 @@ def merge_composites(composite_filepaths, output_path):
     imageio.imwrite(output_path, filtered_merged_image)
 
     return filtered_merged_image
-    
+   
+def segment():
+    """
+    """
+
+    pass
+
 def parse_and_save_cell_masks(input_path, output_path):
     """
     """
    
     aggregate_masks = imageio.imread(input_path)
     num_cells = aggregate_masks.max()
-    flattened_masks = aggregate_masks.flatten()
-    num_pixels = flattened_masks.size
-    
-    is_cell_index = (flattened_masks > flattened_masks.min())
-    binary_mask_data = np.ones(is_cell_index.sum())
-    column_indices = is_cell_index.nonzero()
-    row_indices = aggregate_masks[column_indices] - 1
+    #flattened_masks = aggregate_masks.flatten()
+   
+    # TODO: this only works so far if there are a max of np.iinfo(np.uint16).max cell objects.
+    # Amend so that it works for more as well???
+    is_cell_index = (aggregate_masks > aggregate_masks.min())
+    binary_mask_data = np.ones(shape=is_cell_index.sum())
+    pixel_indices = is_cell_index.nonzero()
+    cell_indices = aggregate_masks[column_indices] - 1
 
-    compressed_cell_masks = csr_matrix((binary_mask_data, (row_indices, column_indices)), shape = (num_cells, num_pixels))
+    compressed_cell_masks = csr_matrix((binary_mask_data, (cell_indices, *cell_indices)), shape = (num_cells, *aggregate_masks.shape))
 
     save_npz(output_path, compressed_cell_masks)
 
