@@ -3,7 +3,11 @@ import imageio
 from scipy.ndimage import gaussian_filter
 from scipy.sparse import csr_matrix, save_npz
 
-from pathlib import Path
+import subprocess
+from cellprofiler_core import image, object, pipeline, preferences, workspace, measurement
+preferences.set_headless()
+
+from pathlib import Path, PurePath
 import multiprocessing as mp
 
 def segment_single_sample(sample, input_directory):
@@ -27,10 +31,16 @@ def segment_single_sample(sample, input_directory):
         for channel_index in composite_channel_indices:
             composite_filepaths.append((round_input_subdirectory / channels[channel_index]).with_suffix( ".tif"))
 
-    output_path = sample_input_subdirectory / "merged_composites.tif"
+    # TODO: fix this to be better if possible?
+    # taking advantage of for loop to get a filepath to one reference image
+    reference_channel_index = imaging_round["reference_channel"]
+    reference_image_filepath = (round_input_subdirectory / channels[reference_channel_index]).with_suffix( ".tif")
 
-    merged_image = merge_composites(composite_filepaths, output_path)
-    return merged_image
+    merged_composite_filepath = sample_input_subdirectory / "merged_composites.tif"
+    merge_composites(composite_filepaths, merged_composite_filepath)
+   
+    print(__file__)
+    segment(reference_image_filepath, merged_composite_filepath, sample_input_subdirectory)
 
 def segment_all_samples(config, parallelize=0):
     """
@@ -73,11 +83,43 @@ def merge_composites(composite_filepaths, output_path):
 
     return filtered_merged_image
    
-def segment():
+def segment(reference_image_filepath, merged_composite_filepath, input_directory):
     """
     """
+    path_to_segmentation_pipe = str(PurePath(__file__).parent / "segment.cpipe")
+    print(path_to_segmentation_pipe)
+    #subprocess.run(["cellprofiler", "-c", "-p", path_to_segmentation_pipe, "-i", input_directory])
+    
+    segmentation_pipeline = pipeline.Pipeline()
+    segmentation_pipeline.load("segment.cppipe")
 
-    pass
+    image_set_list = image.ImageSetList()
+    image_set = image_set_list.get_image_set(0)
+
+    reference_image = imageio.imread(reference_image_filepath)
+    reference_handle = image.Image(reference_image)
+    merged_composite = imageio.imread(merged_composite_filepath)
+    merged_composite_handle = image.Image(merged_composite)
+
+    image_set.add("DAPI", reference_handle)
+    image_set.add("RNA", merged_composite_handle)
+    
+    object_set = object.ObjectSet()
+
+    objects  = object.Objects()
+    
+    object_set.add_objects(objects, "example")
+    measurements = measurement.Measurements()
+    
+    segmentation_workspace = workspace.Workspace(
+        segmentation_pipeline,
+        None,
+        image_set,
+        object_set,
+        measurements,
+        image_set_list,
+    )
+    output_measurements = segmentation_pipeline.run(None)
 
 def parse_and_save_cell_masks(input_path, output_path):
     """
