@@ -117,10 +117,15 @@ def merge_composites(composite_filepaths, output_path):
 def segment(reference_image_filepath, merged_composite_filepath, input_directory, output_directory):
     """
     """
-    path_to_segmentation_pipe = str(PurePath(__file__).parent / "segment.cppipe")
-    print(path_to_segmentation_pipe)
-    subprocess.run(["cellprofiler", "-c", "-p", path_to_segmentation_pipe, "-i", input_directory, "-o", input_directory])
-    print(output_directory)
+    # TODO: this is hacky. Consult with CellProfiler people to use the Python interface to create
+    # a cell segmentation pipeline
+    if __package__:
+        with path(__package__, "segment.cppipe") as segmentation_macro_filepath:
+            pipeline_filepath = segmentation_macro_filepath
+    else:
+        pipeline_filepath = str(PurePath(__file__).parent / "segment.cppipe")
+    print(pipeline_filepath)
+    subprocess.run(["cellprofiler", "-c", "-p", pipeline_filepath, "-i", input_directory, "-o", input_directory])
     subprocess.run(["mv", "output/composite_mask.tiff", output_directory])
     subprocess.run(["rm", "-rf", "output/"])
     
