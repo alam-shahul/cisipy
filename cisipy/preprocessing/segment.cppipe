@@ -62,10 +62,10 @@ Groups:[module_num:4|svn_version:'Unknown'|variable_revision_number:2|show_windo
 IdentifyPrimaryObjects:[module_num:5|svn_version:'Unknown'|variable_revision_number:14|show_window:True|notes:[]|batch_state:array([], dtype=uint8)|enabled:True|wants_pause:False]
     Select the input image:DAPI
     Name the primary objects to be identified:IdentifyPrimaryObjects
-    Typical diameter of objects, in pixel units (Min,Max):12,40
+    Typical diameter of objects, in pixel units (Min,Max):14,45
     Discard objects outside the diameter range?:Yes
     Discard objects touching the border of the image?:Yes
-    Method to distinguish clumped objects:Shape
+    Method to distinguish clumped objects:Intensity
     Method to draw dividing lines between clumped objects:Intensity
     Size of smoothing filter:10
     Suppress local maxima that are closer than this minimum allowed distance:7.0
@@ -100,7 +100,7 @@ IdentifySecondaryObjects:[module_num:6|svn_version:'Unknown'|variable_revision_n
     Select the input objects:IdentifyPrimaryObjects
     Name the objects to be identified:IdentifySecondaryObjects
     Select the method to identify the secondary objects:Propagation
-    Select the input image:DAPI
+    Select the input image:RNA
     Number of pixels by which to expand the primary objects:10
     Regularization factor:0.05
     Discard secondary objects touching the border of the image?:No
@@ -142,7 +142,7 @@ SaveImages:[module_num:8|svn_version:'Unknown'|variable_revision_number:15|show_
     Text to append to the image name:
     Saved file format:tiff
     Output file location:Elsewhere...|output
-    Image bit depth:16-bit integer
+    Image bit depth:32-bit floating point
     Overwrite existing files without warning?:Yes
     When to save:Every cycle
     Record the file and path information to the saved image?:No

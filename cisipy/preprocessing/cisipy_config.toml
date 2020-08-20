@@ -1,7 +1,8 @@
 title = "cisipy_configuration"
 workspace_directory = "medium_test"
 data_directory = "data"
-path_to_fiji="/opt/fiji/Fiji.app"
+path_to_fiji = "/opt/fiji/Fiji.app"
+training_directory = "training"
 
 # Example entry for single tissue with multiple rounds of CISI imaging
 [[samples]]

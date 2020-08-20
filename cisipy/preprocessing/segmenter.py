@@ -160,16 +160,17 @@ def parse_and_save_cell_masks(input_path, output_path):
     """
    
     aggregate_masks = imageio.imread(input_path)
-    num_cells = aggregate_masks.max()
+    num_cells = np.unique(aggregate_masks).size
     flattened_masks = aggregate_masks.flatten()
     image_shape = flattened_masks.shape
 
     # TODO: this only works so far if there are a max of np.iinfo(np.uint16).max cell objects.
     # Amend so that it works for more as well???
-    is_cell_index = (flattened_masks > flattened_masks.min())
+    is_cell_index = (flattened_masks != 0)
     binary_mask_data = np.ones(shape=is_cell_index.sum(), dtype=np.float32)
     pixel_indices = is_cell_index.nonzero()
-    cell_indices = flattened_masks[pixel_indices] - 1
+    mapping, cell_indices = np.unique(flattened_masks, return_inverse=True)
+    #cell_indices = flattened_masks[pixel_indices] - 1
 
     compressed_cell_masks = csr_matrix((binary_mask_data, (cell_indices, *pixel_indices)), shape = (num_cells, *image_shape), dtype=np.float32)
 
