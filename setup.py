@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="cisipy", # Replace with your own username
-    version="0.0.3",
+    version="0.0.4",
     author="Shahul Alam",
     author_email="alam.shahul@gmail.com",
     description="Compressed imaging transcriptomics in Python.",
@@ -32,7 +32,7 @@ setuptools.setup(
         "spams"
     ],
     package_data={
-        "preprocessing": ["Fuse.ijm"],
+        "preprocessing": ["Fuse.ijm", "segment.cppipe"],
     },
     python_requires='>=3.7',
 )
