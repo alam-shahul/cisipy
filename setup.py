@@ -28,7 +28,8 @@ setuptools.setup(
         "python-bioformats",
         "pyimagej",
         "starfish",
-        "sympy<=1.5.1"
+        "sympy<=1.5.1",
+        "spams"
     ],
     package_data={
         "preprocessing": ["Fuse.ijm"],

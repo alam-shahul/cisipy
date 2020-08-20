@@ -56,9 +56,12 @@ def split_filepaths(rounds, input_directory):
 
         channels = imaging_round["channels"]
         composite_channel_indices = imaging_round.get("composite_channels", [])
+        reference_channel_index = imaging_round["reference_channel"]
 
         for channel_index, channel in enumerate(channels):
-            if channel_index in composite_channel_indices:
+            if channel_index == reference_channel_index:
+                continue
+            elif channel_index in composite_channel_indices:
                 composite_filepaths.append((round_input_subdirectory / channel).with_suffix( ".tif"))
             else:
                 direct_filepaths.append((round_input_subdirectory / channel).with_suffix( ".tif"))
@@ -119,6 +122,7 @@ def segment(reference_image_filepath, merged_composite_filepath, input_directory
     subprocess.run(["cellprofiler", "-c", "-p", path_to_segmentation_pipe, "-i", input_directory, "-o", input_directory])
     print(output_directory)
     subprocess.run(["mv", "output/composite_mask.tiff", output_directory])
+    subprocess.run(["rm", "-rf", "output/"])
     
     # segmentation_pipeline = pipeline.Pipeline()
     # segmentation_pipeline.load("segment.cppipe")
