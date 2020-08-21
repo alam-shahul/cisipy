@@ -60,7 +60,6 @@ dependencies:
     - cellprofiler-core==4.0.0rc5
     - centrosome==1.1.7
     - cffi==1.14.2
-    - cisipy==0.0.4
     - click==7.1.2
     - cycler==0.10.0
     - cython==0.29.21
@@ -137,7 +136,6 @@ dependencies:
     - six==1.15.0
     - slicedimage==4.1.1
     - slicerator==1.0.0
-    - spams==2.6.1
     - starfish==0.2.1
     - sympy==1.5.1
     - terminado==0.8.3
