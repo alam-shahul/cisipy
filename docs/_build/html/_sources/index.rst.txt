@@ -1,7 +1,7 @@
 Welcome to cisipy's documentation!
 ==================================
 
-.. automodule:: cisipy.preprocessing.stitcher
+.. automodule:: cisipy.preprocessing
     :members:
 
 .. toctree::
