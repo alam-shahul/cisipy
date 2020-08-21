@@ -58,4 +58,4 @@ html_theme = 'pyramid'
 html_static_path = ['_static']
 
 # Autodoc config
-autodoc_mock_imports = ["spams"]
+autodoc_mock_imports = ["spams", "javabridge", "cellprofiler", "cellprofiler_core"]
