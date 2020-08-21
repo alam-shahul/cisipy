@@ -47,9 +47,6 @@ def stitch(input_directory, input_filename, output_directory, imagej_instance):
       'fusePath': output_directory
     })
 
-    print("About to call imagej!")
-
-    #result = imagej_instance.py.run_macro(STITCHING_MACRO, args)
     stitching_job = imagej_instance.script().run("macro.ijm", STITCHING_MACRO, True, args)
 
     return stitching_job
@@ -60,7 +57,7 @@ def stitch_all_samples(config, parallelize=0):
     # TODO: Fill in docstring
 
     workspace_directory = config["workspace_directory"]
-    input_directory = Path(workspace_directory, "sliced")
+    input_directory = Path(workspace_directory, "unstitched")
     output_directory = Path(workspace_directory, "stitched")
     output_directory.mkdir(exist_ok=True)
 
@@ -73,22 +70,8 @@ def stitch_all_samples(config, parallelize=0):
 
     if parallelize > 1:
         num_processes = mp.cpu_count()
-        print(num_processes)
-        # child_pids = []
         processes = []
         for sample in samples:
-        #    # TODO: This forking is necessary because of how ImageJ works. Consider posting to image.sc to find a fix.
-        #    pid = os.fork()
-
-        #    if pid:
-        #        child_pids.append(pid)
-        #    else:
-        #        stitch_single_sample(sample, input_directory, output_directory, imagej_instance, parallelize - 1)
-        #        break
-     
-        #for child_pid in child_pids:
-        #    os.waitpid(child_pid, 0)
-        #        
             process = mp.Process(target=stitch_single_sample, args=(sample, input_directory, output_directory, imagej_instance, parallelize - 1))
             process.start()
             processes.append(process)
@@ -96,12 +79,8 @@ def stitch_all_samples(config, parallelize=0):
         for process in processes:
             process.join()
     else:
-        #imagej_instance = imagej.init(path_to_fiji)
         for sample in samples:
             stitch_single_sample(sample, input_directory, output_directory, imagej_instance, parallelize)
-
-    # for sample in samples:
-    #     stitch_single_sample(sample, input_directory, output_directory, imagej_instance)
 
 def stitch_single_sample(sample, input_directory, output_directory, imagej_instance, parallelize=0):
     rounds = sample["rounds"]
@@ -111,7 +90,6 @@ def stitch_single_sample(sample, input_directory, output_directory, imagej_insta
     sample_output_directory = output_directory / sample_name
     sample_output_directory.mkdir(exist_ok=True)
 
-    #child_pids = []
     jobs = []
     for round_index, imaging_round in enumerate(rounds, start=1):
         round_directory = ("round%d" % round_index)
@@ -124,28 +102,8 @@ def stitch_single_sample(sample, input_directory, output_directory, imagej_insta
         job = stitch(sample_input_directory, input_filename, output_directory, imagej_instance)
         if parallelize > 0:
             jobs.append(job)
-            # pid = os.fork()
-
-            # if pid:
-            #     child_pids.append(pid)
-            # else:
-            #     imagej_instance = imagej.init("Fiji.app")
-            #     stitch(sample_input_directory, input_filename, output_directory, imagej_instance)
-            #     break
-            # process = mp.Process(target=stitch, args=(sample_input_directory, input_filename, output_directory, imagej_instance))
-            # process.start()
-            # processes.append(process)
-
         else:
-            #imagej_instance = imagej.init("Fiji.app")
-            #print(job)
             job.get()
 
     for job in jobs:
-        #print(job)
         job.get()
-
-    #for child_pid in child_pids:
-    #    os.waitpid(child_pid, 0)
-    #for process in processes:
-    #    process.join()

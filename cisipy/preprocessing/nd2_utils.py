@@ -131,7 +131,7 @@ def slice_ome_tiff_all_samples(config, start, end):
 
     workspace_directory = config["workspace_directory"]
     input_directory = Path(workspace_directory, "unstitched")
-    output_directory = Path(workspace_directory, "sliced")
+    output_directory = Path(config["slice_directory"])
     output_directory.mkdir(exist_ok=True)
 
     samples = config["samples"]
@@ -146,13 +146,11 @@ def slice_ome_tiff_single_sample(sample, input_directory, output_directory, star
     sample_name = sample["name"]
 
     sample_input_directory = input_directory / sample_name
-    sample_output_directory = output_directory / sample_name
-    sample_output_directory.mkdir(exist_ok=True)
 
     for round_index, imaging_round in enumerate(rounds):
         filename = imaging_round["filename"]
 
         input_filepath = (sample_input_directory / filename).with_suffix(".ome.tif")
-        output_filepath = (sample_output_directory / filename).with_suffix(".ome.tif")
+        output_filepath = (output_directory / filename).with_suffix(".ome.tif")
 
         slice_ome_tiff(input_filepath, output_filepath, start, end, use_bigtiff=True)

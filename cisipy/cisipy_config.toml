@@ -1,6 +1,7 @@
 title = "cisipy_configuration"
 workspace_directory = "preprocessing/medium_test"
 data_directory = "preprocessing/data"
+slice_directory = "preprocessing/small_test"
 path_to_fiji = "preprocessing/Fiji.app"
 training_directory = "preprocessing/training"
 
