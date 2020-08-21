@@ -20,6 +20,21 @@ def stitch(input_directory, input_filename, output_directory, imagej_instance):
     Use the BigStitcher plugin to stitch together the series at input_filepath.
 
     See Fuse.ijm for the ImageJ macro code.
+
+    Args:
+      input_directory (Union[str, pathlib.Path]):
+        Directory in which input microscopy file is located.
+      input_filename (str):
+        Name of microscopy file (excluding file extension).
+      output_directory (Union[str, pathlib.Path]):
+        Directory in which to output stitched images,
+      imagej_instance (imagej.ImageJ):
+        An ImageJ instance.
+
+    Returns:
+      A handle on the Java process that is completing the stitching job. This is useful
+      for keeping track of concurrent stitching jobs.
+        
     """
 
     # Formatting arguments correctly for ImageJ macro code
